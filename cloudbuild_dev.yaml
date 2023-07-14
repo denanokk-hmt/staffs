@@ -1,0 +1,68 @@
+availableSecrets:
+  secretManager:
+  #- versionName: projects/PROJECT_ID/secrets/secret-name/versions/latest
+  - versionName: projects/110451896125/secrets/staffs_hanger_clone/versions/1
+    env: 'SSH_KEY'
+
+steps:
+
+# Access the id_github file from Secret Manager, and setup SSH
+- name: 'gcr.io/cloud-builders/git'
+  secretEnv: ['SSH_KEY']
+  entrypoint: 'bash'
+  args:
+  - -c
+  - |
+    echo "$$SSH_KEY" >> /root/.ssh/id_rsa
+    chmod 400 /root/.ssh/id_rsa
+    cp known_hosts.bitbucket /root/.ssh/known_hosts
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+# Clone the repository
+- name: 'gcr.io/cloud-builders/git'
+  args:
+  - clone
+  - --recurse-submodules
+  - git@bitbucket.org:svc_bs_devloper/v2-hanger.git
+  - hanger
+  volumes:
+  - name: 'ssh'
+    path: /root/.ssh
+
+# This step builds the container image.
+- name: 'gcr.io/cloud-builders/docker'
+  id: Build
+  args:
+  - 'build'
+  - '--no-cache'
+  - '--build-arg'
+  - 'COMMITID=$SHORT_SHA'
+  - '-t'
+  - 'gcr.io/$PROJECT_ID/hmt/staffs/dev:$SHORT_SHA'
+  - '.'
+
+# This step pushes the image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  id: Push
+  args:
+  - 'push'
+  - 'gcr.io/$PROJECT_ID/hmt/staffs/dev:$SHORT_SHA'
+
+#Cloud Run Deploy
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: Cloud-Run-Deploy
+  args:
+  - 'beta'
+  - 'run'
+  - 'deploy'
+  - 'staffs'
+  - '--image'
+  - 'gcr.io/$PROJECT_ID/hmt/staffs/dev:$SHORT_SHA'
+  - '--allow-unauthenticated'
+  - '--region=asia-east1'
+  - '--platform=managed'
+
+#TAG
+tags : [ 'staffs', 'dev' ]

@@ -1,0 +1,33 @@
+{
+  "name": "Staffs",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "@google-cloud/datastore": "^6.3.1",
+    "axios": "^0.21.1",
+    "body-parser": "~1.18.2",
+    "config": "^1.30.0",
+    "cookie-parser": "~1.4.3",
+    "dateformat": "^3.0.3",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.3",
+    "firebase-admin": "^9.11.1",
+    "grpc": "^1.15.1",
+    "jade": "^1.9.2",
+    "qs": "^6.9.6",
+    "serve-favicon": "~2.4.5",
+    "url": "^0.11.0",
+    "yaml": "^0.3.0"
+  },
+  "repository": {},
+  "engines": {
+    "node": "14.15.x"
+  },
+  "devDependencies": {
+    "@google-cloud/nodejs-repo-tools": "^1.0.8",
+    "semistandard": "^12.0.1"
+  }
+}
